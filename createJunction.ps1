@@ -6,5 +6,3 @@ $javaHomeValues = Get-Content -Path ".\javapath.txt"
 foreach ($javaHomeValue in $javaHomeValues) {
     New-Item -ItemType Junction -Path $javaHomeValue -Target $openJdkPath
 }
-
-New-Item -ItemType Junction -Path "C:\Program Files (x86)\Common Files\Oracle\Java\javapath" -Target $openJdkPath

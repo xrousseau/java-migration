@@ -9,13 +9,18 @@ foreach ($guid in $guidsArray) {
 }
 
 # Clean junction path
-Remove-Item -Path "C:\Program Files (x86)\Common Files\Oracle" -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path "C:\Program Files\Java" -Recurse -Force -ErrorAction SilentlyContinue
 
-# install Oracle Java JRE
+
+# install Oracle Java 8 JRE
 $pathToJRE = $downloadsPath + "\jre-8u202-windows-x64.exe"
 Start-Process -FilePath $pathToJRE -ArgumentList "/s INSTALL_SILENT=1 AUTO_UPDATE=0 EULA=0" -Wait
 
-# install Oracle Java JDK
+# install Oracle Java 8 JDK
 $pathToJRE = $downloadsPath + "\jdk-8u202-windows-x64.exe"
 Start-Process -FilePath $pathToJRE -ArgumentList "/s INSTALL_SILENT=1 AUTO_UPDATE=0 EULA=0" -Wait
+
+# install Oracle Java 11 JDK (Dafault)
+$pathToJRE = $downloadsPath + "\jdk-11.0.20_windows-x64_bin.exe"
+Start-Process -FilePath $pathToJRE -ArgumentList "/s INSTALL_SILENT=1 AUTO_UPDATE=0 EULA=0" -Wait
+
