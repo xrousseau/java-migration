@@ -1,4 +1,4 @@
-.\helper.ps1
+. .\helper.ps1
 
 $jrePackages = @{
     "jre-8"  = "OpenJDK8U-jre_x64_windows_hotspot_8u392b08.msi"
@@ -10,6 +10,19 @@ $jrePackages = @{
     "jdk-17" = "OpenJDK17U-jdk_x64_windows_hotspot_17.0.9_9.msi"
     "jdk-21" = "OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.msi"
 }
+
+
+$openJDKPaths = @{
+    "jre-8" = "C:\Program Files\Eclipse Adoptium\jre-8.0.392.8-hotspot"
+    "jre-11" = "C:\Program Files\Eclipse Adoptium\jre-11.0.21.9-hotspot"
+    "jre-17" = "C:\Program Files\Eclipse Adoptium\jre-17.0.9_9-hotspot"
+    "jre-21" = "C:\Program Files\Eclipse Adoptium\jre-11.0.21.9-hotspot"
+    "jdk-8" = "C:\Program Files\Eclipse Adoptium\jdk-8.0.392.8-hotspot"
+    "jdk-11" = "C:\Program Files\Eclipse Adoptium\jdk-11.0.21.9-hotspot"
+    "jdk-17" = "C:\Program Files\Eclipse Adoptium\jdk-17.0.9_9-hotspot"
+    "jdk-21" = "C:\Program Files\Eclipse Adoptium\jdk-21.0.1_12-hotspot"
+} 
+
 
 # Retreive Oracle Java paths from registry to later reconstruct with junction path after uninstallation
 $registryPath = "HKLM:\SOFTWARE\JavaSoft"
@@ -25,13 +38,22 @@ foreach ($entry in $javaHomeEntries) {
     }
 }
 
+# Find the default Java version installed
+$version = (Get-Command java).Version.Major
+
+# Move defaut version at the end of the Array
+$index = ($javaHomeValues | Where-Object {$_ -match "\\(jdk|jre)-$version"} | Select-Object -Last 1)
+
+if ($null -ne $index) {
+    $javaHomeValues = [System.Collections.ArrayList]$javaHomeValues
+    $javaHomeValues.Remove($index)
+    $javaHomeValues.Add($index)
+}
+
+# Save to file for recovery needs
 $javaHomeValues | Out-File -FilePath ".\javapath.txt"
 
-# Get the default version installed
-$version = Get-Command java | Select-Object Version
-
-
-# 2. Install OpenJDK equivalent version to Oracle Java  
+# Install OpenJDK equivalent version to Oracle Java  
 $javaHomeValues = Get-Content -Path ".\javapath.txt"
 $downloadsPath = (New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path
 
@@ -44,9 +66,7 @@ foreach ($javaHomeValue in $javaHomeValues) {
     Write-Host "$openJDKPackagesToInstall installed"
 }
 
-Exit
-
-# 3. Uninstall Oracle Java instances
+# Uninstall all Oracle Java instances
 $guidsArray = Get-CimInstance -ClassName Win32_Product | Where-Object { $_.Vendor -like "*Oracle*" -and $_.Name -like "*Java*" } | ForEach-Object { $_.IdentifyingNumber }
 foreach ($guid in $guidsArray) {
     Write-Host "Attempting removal of $guid "
@@ -54,12 +74,12 @@ foreach ($guid in $guidsArray) {
     Start-Process -FilePath "msiexec.exe" -ArgumentList $uninstallCmd -Wait -NoNewWindow
 }
 
-# Create Junction Path
-$openJdkPath = "C:\Program Files\Eclipse Adoptium\jre-8.0.392.8-hotspot"
-
+# Create Junction Path to mock previous Oracle installation
 $javaHomeValues = Get-Content -Path ".\javapath.txt"
 
 foreach ($javaHomeValue in $javaHomeValues) {
+
+    $version = JavaVersion -Path $javaHomeValue
+    $openJdkPath = $openJDKPaths[$version]
     New-Item -ItemType Junction -Path $javaHomeValue -Target $openJdkPath
 }
-
