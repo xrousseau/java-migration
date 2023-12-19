@@ -1,3 +1,5 @@
+# This script is used to reinitialize the windows environment with Oracle Java only
+
 $downloadsPath = (New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path
 
 # Remove any Java environement left over
