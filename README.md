@@ -1,5 +1,5 @@
 # Purpose
-This script purpose is to replace currently installed version of Oracle Java (JRE and JDK) and replace it with an equivalent OpenJDK version.
+This script (migration.ps1) purpose is to replace currently installed version of Oracle Java (JRE and JDK) and replace it with an equivalent OpenJDK version.
 The script execution steps are :
 1. Inventory the Oracle Java packages installed on a Windows desktop computer and identify the default Java version.
 1. Install equivalent or closest upward LTS Open JDK versions. Ensure the same OpenJDK version is set as default to avoid breaking changes.
@@ -13,3 +13,6 @@ The script currently dependens on Eclipse Temurin OpenJDK packages in the Downlo
 The script migrate to the closest LTS version of Java. For example, Java currently LTS versions are `8, 11, 17 and 21`.
 For example, an Oracle Java 9 will be migrated to an OpenJDK 11.
 The script will install to same package type i.e. JDK vs JRE.
+
+# Test Env Script
+initTestEnv.ps1 is used to reinitialize a test environement. This scripts depends on Oracle Java packages.
